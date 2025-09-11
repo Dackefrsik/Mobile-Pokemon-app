@@ -1,7 +1,8 @@
-import { TextInput, Text, StyleSheet, View, FlatList, Image, TouchableOpacity, Modal } from 'react-native';
+import { TextInput, Text, StyleSheet, View, FlatList, Image, TouchableOpacity, Modal, Dimensions } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-
+const { height } = Dimensions.get('window');
 type image = {
     front_default: string;
 };
@@ -35,6 +36,7 @@ export default function SearchScreen() {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setModalImage] = useState<string | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string>("");
 
     const typeColorsArray = [
         { type: "normal", color: "#A8A77A" },
@@ -61,6 +63,7 @@ export default function SearchScreen() {
 
         const fetchData = async () => {
         try {
+            setErrorMsg("");
             const response = await fetch('https://pokeapi.co/api/v2/pokemon/' + searchText.toLowerCase().trim());
             const data: PokemonApiResponse = await response.json();
             const abilityNames = data.moves.map(a => a.move.name);
@@ -69,7 +72,11 @@ export default function SearchScreen() {
         
         } catch (error) {
             setPokemonData([]);
-            //console.error('Error fetching Pokémon data:', error);
+            setErrorMsg("Failed to fetch Pokémon data!");
+            console.log(errorMsg);
+            setTimeout(() => {
+                setErrorMsg("");
+            }, 3000);
         }
     };
 
@@ -84,12 +91,21 @@ export default function SearchScreen() {
             <TextInput style={styles.Search} placeholder='Search Pokémon...' placeholderTextColor={"#999"} ref={inputRef} onChangeText={setSearchText}/>
         </View>
         <View style={styles.Body}>
+            <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+            {searchText != "" && errorMsg ? 
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <Text style={{ color: 'red', textAlign: 'center', marginTop: 30, fontSize: 20}}>{errorMsg}</Text> 
+                    <MaterialIcons name="error" size={50} color="red" />
+                </View>
+                : 
+                null}
+                </View>         
             <FlatList
                 data={pokemonData}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }}>
-                        <View style={{ alignItems: 'center', borderBottomWidth: 1, marginBottom: 10, borderBottomColor: '#000000' }}>
+                        <View style={{ alignItems: 'center', borderBottomWidth: 1, marginBottom: 10, borderBottomColor: '#000000w' }}>
                             <TouchableOpacity onPress={() => { setModalImage(item.image); setModalVisible(true); }}>
                                 <Image source={{uri: item.image}}  style={{width : 150, height: 150, alignContent : "center"}}/>
                             </TouchableOpacity>
@@ -113,7 +129,7 @@ export default function SearchScreen() {
                    
                     </View>
                 )}
-            /> 
+            />
         </View>
 
         <Modal
@@ -122,7 +138,7 @@ export default function SearchScreen() {
             visible={modalVisible}
             onRequestClose={() => setModalVisible(false)}
             >
-            <View style={{backgroundColor: "#ADD8E6"}}>
+            <View style={{backgroundColor: "#ADD8E6", opacity: 0.95, flex: 1, justifyContent: "center", alignItems: "center"}}>
                 <Image source={{uri: selectedImage ? selectedImage : undefined}} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
                 <TouchableOpacity onPress={() => setModalVisible(false)} style={{ position: 'absolute', top: 40, right: 20, backgroundColor: '#ADD8E6', padding: 10, borderRadius: 5 }}>
                     <Text style={{fontSize: 20}}>Close</Text>
@@ -167,5 +183,6 @@ const styles = StyleSheet.create({
         marginTop: 0,
         flex: 1,
         backgroundColor: '#FFFFFF',
+        height: '100%',
     }
 } );

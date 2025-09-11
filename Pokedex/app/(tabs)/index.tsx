@@ -1,75 +1,116 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState, useEffect, useRef } from "react";
+import { View, Text, StyleSheet, FlatList, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+export interface Pokemon {
+    name: string;
+    id: string;
+    url: string;
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+export interface PokemonApiResponse {
+    results: Pokemon[];
+}
+
+interface PokemonDetails {
+    id: number;
+    name: string;
+    sprites: {
+       front_default: string;
+    };
+    types: { type: { name: string } }[];
+}
+
+export default function Pokemons() {
+
+        const [pokemonData, setPokemonData] = useState<Pokemon[]>([]);
+
+        const [detailedData, setDetailedData] = useState<PokemonDetails[]>();
+
+        const [errorMsg, setErrorMsg] = useState("");
+
+        const [loadingText, setLoadingText] = useState("Loading Pokémons"); 
+   
+        const text = useRef<Text>(null);
+
+    useEffect(() => {
+        const loadingInterval = setInterval(() => {
+            if(loadingText.length <= 18) {
+                setLoadingText((prev) => prev + ".");
+            }
+            }, 2000);
+        const fetchData = async () => {
+        try {
+            const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=300');
+            const data: PokemonApiResponse = await response.json();
+            setPokemonData(data.results);
+
+            const details = await Promise.all(data.results.map(async (pokemon) => {
+                const res = await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemon.name);
+                return res.json();
+            }));
+
+            setDetailedData(details);
+
+        } catch (error) {
+
+            setErrorMsg("Failed to fetch Pokémon data.");
+
+            console.log(errorMsg)
+        }  
+    };
+
+    fetchData();
+
+    }, []);
+
+    
+    
+    return (
+        <View style={Style.Background}>
+            <Text style={Style.Titel}>Pokémons</Text>
+            <View style={Style.Body}>
+            {detailedData ?   <FlatList
+                data={detailedData}
+                keyExtractor={(item) => item.name}
+                renderItem={({ item }) => (
+                    <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }}>
+                        {item.sprites?.front_default ? (
+                        <Image source={{uri : item.sprites.front_default}} style={{width : 100, height: 100}}/>
+                        ) : ( <Text style={{ fontSize: 18 }}>No Image</Text>)}
+                        <Text style={{ fontSize: 18 }}>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
+                        <Text style={{fontSize: 12, color: "#666"}}>ID: {item.id}</Text>
+                    </View>
+                )}
+            /> 
+            : 
+            
+            <Text style={{ fontSize: 28, textAlign: 'center', marginTop: 40 }}>{loadingText}</Text>}
+            </View>
+        </View>
+    );
+    }
+
+const Style = StyleSheet.create({
+
+    Background:{
+        backgroundColor: '#ff3333',
+        flex: 1,
+    },
+
+    Titel:{
+        fontSize: 30,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginTop: 70,
+        marginBottom: 20,
+        color: '#FFFFFF',
+    },
+
+    Body:{
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        paddingBottom: 80,
+        
+    }
 });
