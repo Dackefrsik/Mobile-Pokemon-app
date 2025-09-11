@@ -35,7 +35,11 @@ export default function Pokemons() {
 
     useEffect(() => {
         const loadingInterval = setInterval(() => {
-            if(loadingText.length <= 18) {
+            console.log(loadingText.length);
+            if(loadingText.length >= 18) {
+               
+            }
+            else{
                 setLoadingText((prev) => prev + ".");
             }
             }, 2000);
@@ -49,6 +53,8 @@ export default function Pokemons() {
                 const res = await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemon.name);
                 return res.json();
             }));
+            
+            clearInterval(loadingInterval);
 
             setDetailedData(details);
 
