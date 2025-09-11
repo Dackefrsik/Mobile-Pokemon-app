@@ -1,8 +1,15 @@
-import { TextInput, Text, StyleSheet, View, FlatList } from 'react-native';
+import { TextInput, Text, StyleSheet, View, FlatList, Image, TouchableOpacity, Modal } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
+
+
+type image = {
+    front_default: string;
+};
+
 
 export interface Pokemon {
     name: string;
+    image: string;
     id: string;
     weight: string;
     attribute1: string[];
@@ -12,28 +19,22 @@ export interface Pokemon {
 
 export interface PokemonApiResponse {
     name: string;
+    sprites: image;
     id: number;
     moves: { move: { name: string; url: string } }[];
     types: { type: { name: string; url: string } }[];
     weight: number;
 }
 
-export interface Types {
-    name: string;
-    color: string;
-    url : string;
-}
-
-export interface typeApiResponse {
-    types: { type: { name: string; url: string } }[];
-    color: { name: string; url: string };
-}
 
 export default function SearchScreen() {
 
     const [pokemonData, setPokemonData] = useState<Pokemon[]>([]);
     const [searchText, setSearchText] = useState<string>('');
     const inputRef = useRef<TextInput>(null);
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedImage, setModalImage] = useState<string | null>(null);
 
     const typeColorsArray = [
         { type: "normal", color: "#A8A77A" },
@@ -64,7 +65,7 @@ export default function SearchScreen() {
             const data: PokemonApiResponse = await response.json();
             const abilityNames = data.moves.map(a => a.move.name);
             const types = data.types.map(t => t.type.name);
-            setPokemonData([{ name: data.name, id: data.id.toString(), weight: data.weight.toString(), attribute1: abilityNames, types: types , url: '' }]);
+            setPokemonData([{ name: data.name, image: data.sprites.front_default , id: data.id.toString(), weight: data.weight.toString(), attribute1: abilityNames, types: types , url: '' }]);
         
         } catch (error) {
             setPokemonData([]);
@@ -88,6 +89,11 @@ export default function SearchScreen() {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }}>
+                        <View style={{ alignItems: 'center', borderBottomWidth: 1, marginBottom: 10, borderBottomColor: '#000000' }}>
+                            <TouchableOpacity onPress={() => { setModalImage(item.image); setModalVisible(true); }}>
+                                <Image source={{uri: item.image}}  style={{width : 150, height: 150, alignContent : "center"}}/>
+                            </TouchableOpacity>
+                        </View>
                         <Text style={{ fontSize: 24, color: "#000000" }}>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
                         <Text style={{ fontSize: 18, color: "#666" }}>ID: {item.id}</Text>
                         <Text style={{ fontSize: 18, color: "#666" }}>Weight: {item.weight} kg</Text>
@@ -109,6 +115,21 @@ export default function SearchScreen() {
                 )}
             /> 
         </View>
+
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+            >
+            <View style={{backgroundColor: "#ADD8E6"}}>
+                <Image source={{uri: selectedImage ? selectedImage : undefined}} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                <TouchableOpacity onPress={() => setModalVisible(false)} style={{ position: 'absolute', top: 40, right: 20, backgroundColor: '#ADD8E6', padding: 10, borderRadius: 5 }}>
+                    <Text style={{fontSize: 20}}>Close</Text>
+                </TouchableOpacity>
+            </View>
+        </Modal>        
+
     </View> 
   );
 }
