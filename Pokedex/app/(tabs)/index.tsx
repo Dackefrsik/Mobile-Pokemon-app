@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Modal } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import {style} from "../style/style";
 
 export interface Pokemon {
     name: string;
@@ -100,51 +101,51 @@ export default function Pokemons() {
     
     
     return (
-        <View style={Style.Background}>
-            <Text style={Style.Titel}>Pokémons</Text>
+        <View style={style.Background}>
+            <Text style={style.Titel}>Pokémons</Text>
             <View style={Style.Body}>
             {detailedData ?   <FlatList
                 data={detailedData}
                 keyExtractor={(item) => item.name}
                 renderItem={({ item }) => (
-                    <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }}>
+                    <View style={style.ListItem}>
                         <TouchableOpacity onPress={() => {setMNodalData([{ name: item.name, image: item.sprites.front_default , id: item.id.toString(), weight: item.weight.toString(), moves: item.moves.map(m => m.move.name), types: item.types.map(t => t.type.name) , url: '' }]);
                             setModalVisible(true); }}>
                             {item.sprites?.front_default ? (
-                            <Image source={{uri : item.sprites.front_default}} style={{width : 100, height: 100}}/>
+                            <Image source={{uri : item.sprites.front_default}} style={Style.ListImage}/>
                             ) : ( <Text style={{ fontSize: 18 }}>No Image</Text>)}
-                            <Text style={{ fontSize: 18 }}>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
-                            <Text style={{fontSize: 12, color: "#666"}}>ID: {item.id}</Text>
+                            <Text style={style.PokémonName}>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
+                            <Text style={style.PokémonAtributes}>ID: {item.id}</Text>
                         </TouchableOpacity>    
                     </View>
                 )}
             /> 
             : 
             
-            <Text style={{ fontSize: 28, textAlign: 'center', marginTop: 40 }}>{loadingText}</Text>}
+            <Text style={Style.LoadingText}>{loadingText}</Text>}
             </View>
             {modalVisible && (
                 <Modal 
                     animationType="fade"
                     transparent={true}>
-                        <View style={{ flex: 1, marginTop: 50, backgroundColor: '#ff3333', opacity: 0.95}}>
+                        <View style={Style.ModalBackground}>
                             <View>
-                                <TouchableOpacity style={{right: 20, alignItems: "flex-end"}} onPress={() => setModalVisible(false)}>
-                                    <AntDesign name="close" size={24} color="black" style={{marginTop:20, marginBottom: 10}} />  
+                                <TouchableOpacity style={style.ModalClose} onPress={() => setModalVisible(false)}>
+                                    <AntDesign name="close" size={24} color="black" style={style.ModalCloseIcon} />  
                                 </TouchableOpacity>
                             </View>
-                            <View style={{backgroundColor: "#ffffff", flex: 1}}>
-                                <Image source={{uri: modalData[0].image}} style={{width: 200, height: 200}}/>
-                                <Text style={{fontSize: 22, left: 10, marginBottom: 15}}>{modalData[0].name.charAt(0).toUpperCase() + modalData[0].name.slice(1)}</Text>
-                                <Text style={{fontSize: 18, left: 10, color: "#666"}}>ID: {modalData[0].id}</Text>
-                                <Text style={{fontSize: 18, left: 10, color: "#666"}}>Weight: {modalData[0].weight} kg</Text>
-                                <Text style={{fontSize: 20, left: 10, marginTop: 10}}>Types</Text>
+                            <View style={style.ModalBody}>
+                                <Image source={{uri: modalData[0].image}} style={Style.ModalImage}/>
+                                <Text style={style.PokémonName}>{modalData[0].name.charAt(0).toUpperCase() + modalData[0].name.slice(1)}</Text>
+                                <Text style={style.PokémonAtributes}>ID: {modalData[0].id}</Text>
+                                <Text style={style.PokémonAtributes}>Weight: {modalData[0].weight} kg</Text>
+                                <Text style={style.PokémonTypesMoves}>Types</Text>
                                 {modalData[0].types.map(t => 
-                                    <Text key={t} style={{fontSize: 18, left: 10, marginTop: 5}}>{t.charAt(0).toUpperCase() + t.slice(1)}</Text>
+                                    <Text key={t} style={style.PokémonType}>{t.charAt(0).toUpperCase() + t.slice(1)}</Text>
                                 )}
-                                <Text style={{fontSize: 20, left: 10, marginTop: 10, marginBottom: 10}}>Moves</Text>
+                                <Text style={style.PokémonTypesMoves}>Moves</Text>
                                 {modalData[0].moves.slice(0,4).map((m, index) => 
-                                    <Text key={m} style={{fontSize: 16, left: 10}}>{index + " " + m.charAt(0).toUpperCase() + m.slice(1)}</Text>
+                                    <Text key={m} style={style.PokémonMoves}>{(index + 1) + " " + m.charAt(0).toUpperCase() + m.slice(1)}</Text>
                                 )
                                 }
                             </View>
@@ -156,24 +157,33 @@ export default function Pokemons() {
 
 const Style = StyleSheet.create({
 
-    Background:{
-        backgroundColor: '#ff3333',
-        flex: 1,
-    },
-
-    Titel:{
-        fontSize: 30,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginTop: 70,
-        marginBottom: 20,
-        color: '#FFFFFF',
-    },
-
     Body:{
         flex: 1,
         backgroundColor: '#FFFFFF',
         paddingBottom: 80,
         
+    },
+    
+    LoadingText:{
+        fontSize: 28, 
+        textAlign: 'center', 
+        marginTop: 40
+    },
+
+    ModalBackground:{
+        flex: 1, 
+        marginTop: 50, 
+        backgroundColor: '#ff3333', 
+        opacity: 0.95
+    }, 
+
+    ListImage:{
+        width : 100, 
+        height: 100
+    },
+
+    ModalImage:{
+        width: 200, 
+        height: 200
     }
 });

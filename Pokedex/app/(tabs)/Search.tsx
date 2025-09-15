@@ -2,6 +2,7 @@ import { TextInput, Text, StyleSheet, View, FlatList, Image, TouchableOpacity, M
 import { useEffect, useRef, useState } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import {style} from "../style/style";
 
 
 type image = {
@@ -86,35 +87,34 @@ export default function SearchScreen() {
     }, [searchText]);
 
   return (
-    <View style={styles.Background}>
+    <View style={style.Background}>
         <View style={styles.SearchScreen}>
-            <Text style={styles.Titel}>Search</Text>
+            <Text style={style.Titel}>Search</Text>
             <TextInput style={styles.Search} placeholder='Search Pokémon...' placeholderTextColor={"#999"} ref={inputRef} onChangeText={setSearchText}/>
         </View>
         <View style={styles.Body}>
-            <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
             {searchText !== "" && errorMsg ? 
-                <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                    <Text style={{ color: 'red', textAlign: 'center', marginTop: 30, fontSize: 20}}>{errorMsg}</Text> 
+                <View style={styles.SearchErrorMsg}>
+                    <Text style={styles.ErrorText}>{errorMsg}</Text> 
                     <MaterialIcons name="error" size={50} color="red" />
                 </View>
                 : 
                 null}
-                </View>         
+                     
             <FlatList
                 data={pokemonData}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
-                    <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }}>
-                        <View style={{ alignItems: 'center', borderBottomWidth: 1, marginBottom: 10, borderBottomColor: '#000000w' }}>
+                    <View style={style.ListItem}>
+                        <View style={styles.PokémonImageView}>
                             <TouchableOpacity onPress={() => { setModalImage(item.image); setModalVisible(true); }}>
-                                <Image source={{uri: item.image}}  style={{width : 150, height: 150, alignContent : "center"}}/>
+                                <Image source={{uri: item.image}}  style={styles.PokémonImage}/>
                             </TouchableOpacity>
                         </View>
-                        <Text style={{ fontSize: 24, color: "#000000" }}>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
-                        <Text style={{ fontSize: 18, color: "#666" }}>ID: {item.id}</Text>
-                        <Text style={{ fontSize: 18, color: "#666" }}>Weight: {item.weight} kg</Text>
-                        <Text style={{ fontSize: 20, color: "#00000", marginTop: 20 }}>Types:</Text>
+                        <Text style={style.PokémonName}>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
+                        <Text style={style.PokémonAtributes}>ID: {item.id}</Text>
+                        <Text style={style.PokémonAtributes}>Weight: {item.weight} kg</Text>
+                        <Text style={style.PokémonTypesMoves}>Types:</Text>
                         {item.types.map((type, index) => {
                             const typeColor = typeColorsArray.find(t => t.type === type)?.color || '#000';
                             return (
@@ -122,10 +122,10 @@ export default function SearchScreen() {
                             );
                         })}
 
-                        <Text style={{ fontSize: 20, color: "#00000", marginTop: 20 }}>Moves</Text>
+                        <Text style={style.PokémonTypesMoves}>Moves</Text>
 
                         {item.attribute1.slice(0,4).map((move, index) => (
-                            <Text key={index} style={{ fontSize: 16, color: "#666" }}>Move {index + 1}: {move.charAt(0).toUpperCase() + move.slice(1)}</Text>
+                            <Text key={index} style={style.PokémonMoves}>Move {index + 1}: {move.charAt(0).toUpperCase() + move.slice(1)}</Text>
                         ))}
                    
                     </View>
@@ -139,10 +139,10 @@ export default function SearchScreen() {
             visible={modalVisible}
             onRequestClose={() => setModalVisible(false)}
             >
-            <View style={{backgroundColor: "#ADD8E6", opacity: 0.95, flex: 1, justifyContent: "center", alignItems: "center"}}>
-                <Image source={{uri: selectedImage ? selectedImage : undefined}} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
-                <TouchableOpacity onPress={() => setModalVisible(false)} style={{ position: 'absolute', top: 40, right: 20, backgroundColor: '#ADD8E6', padding: 10, borderRadius: 5 }}>
-                    <AntDesign name="close" size={24} color="black" />  
+            <View style={styles.ModalBackground}>
+                <Image source={{uri: selectedImage ? selectedImage : undefined}} style={styles.ModalImage} resizeMode="contain" />
+                <TouchableOpacity onPress={() => setModalVisible(false)} style={style.ModalClose}>
+                    <AntDesign name="close" size={24} color="black" style={style.ModalCloseIcon}/>  
                 </TouchableOpacity>
             </View>
         </Modal>        
@@ -152,22 +152,9 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-    Background:{
-        backgroundColor: '#ff3333',
-        flex: 1,
-    },
 
     SearchScreen:{
         backgroundColor: '#ff3333',
-    },
-
-    Titel:{
-        fontSize: 30,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginTop: 70,
-        marginBottom: 20,
-        color: '#FFFFFF',
     },
 
     Search: {
@@ -185,5 +172,45 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
         height: '100%',
+    }, 
+
+    ModalImage:{ 
+        width: '100%', 
+        height: '100%' 
+    },
+
+    ErrorText:{
+        color: 'red', 
+        textAlign: 'center', 
+        marginTop: 30, 
+        fontSize: 20
+    },
+
+    PokémonImage:{
+        width : 150, 
+        height: 150, 
+        alignContent : "center"
+    },
+
+    PokémonImageView:{ 
+        alignItems: 'center', 
+        borderBottomWidth: 1, 
+        marginBottom: 10, 
+        borderBottomColor: '#000000w' 
+    }, 
+
+    SearchErrorMsg:{
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        marginTop: 20
+    },
+
+    ModalBackground:{
+        backgroundColor: "#ADD8E6", 
+        opacity: 0.95, 
+        flex: 1, 
+        justifyContent: "center", 
+        alignItems: "center"
     }
+    
 } );
