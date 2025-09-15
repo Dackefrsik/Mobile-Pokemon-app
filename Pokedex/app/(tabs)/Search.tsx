@@ -1,8 +1,9 @@
-import { TextInput, Text, StyleSheet, View, FlatList, Image, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { TextInput, Text, StyleSheet, View, FlatList, Image, TouchableOpacity, Modal } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
-const { height } = Dimensions.get('window');
+
 type image = {
     front_default: string;
 };
@@ -92,7 +93,7 @@ export default function SearchScreen() {
         </View>
         <View style={styles.Body}>
             <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
-            {searchText != "" && errorMsg ? 
+            {searchText !== "" && errorMsg ? 
                 <View style={{justifyContent: 'center', alignItems: 'center'}}>
                     <Text style={{ color: 'red', textAlign: 'center', marginTop: 30, fontSize: 20}}>{errorMsg}</Text> 
                     <MaterialIcons name="error" size={50} color="red" />
@@ -141,7 +142,7 @@ export default function SearchScreen() {
             <View style={{backgroundColor: "#ADD8E6", opacity: 0.95, flex: 1, justifyContent: "center", alignItems: "center"}}>
                 <Image source={{uri: selectedImage ? selectedImage : undefined}} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
                 <TouchableOpacity onPress={() => setModalVisible(false)} style={{ position: 'absolute', top: 40, right: 20, backgroundColor: '#ADD8E6', padding: 10, borderRadius: 5 }}>
-                    <Text style={{fontSize: 20}}>Close</Text>
+                    <AntDesign name="close" size={24} color="black" />  
                 </TouchableOpacity>
             </View>
         </Modal>        

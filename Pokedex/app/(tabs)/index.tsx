@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, FlatList, Image } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useState, useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Modal } from "react-native";
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 export interface Pokemon {
     name: string;
+    image: string;
+    weight: string;
+    moves: string[];
+    types: string[];
     id: string;
     url: string;
 }
@@ -18,12 +22,16 @@ interface PokemonDetails {
     sprites: {
        front_default: string;
     };
-    types: { type: { name: string } }[];
+    weight: number;
+    moves: { move: { name: string, url : string } }[];
+    types: { type: { name: string, url : string } }[];
 }
 
 export default function Pokemons() {
 
-        const [pokemonData, setPokemonData] = useState<Pokemon[]>([]);
+        const [modalData, setMNodalData] = useState<Pokemon[]>([]);
+
+        const [modalVisible, setModalVisible] = useState(false);
 
         const [detailedData, setDetailedData] = useState<PokemonDetails[]>();
 
@@ -31,30 +39,47 @@ export default function Pokemons() {
 
         const [loadingText, setLoadingText] = useState("Loading Pokémons"); 
    
-        const text = useRef<Text>(null);
-
     useEffect(() => {
-        const loadingInterval = setInterval(() => {
-            console.log(loadingText.length);
-            if(loadingText.length >= 18) {
-               
+        /* const loadingInterval = setInterval(() => {
+            
+            if(loadingText.length >= 19) {
+                console.log(loadingText + " >= 18");
             }
             else{
                 setLoadingText((prev) => prev + ".");
+                console.log(loadingText)
+                console.log(loadingText.length);
+            }
+            }, 2000); */
+
+            const loadingInterval = setInterval(() => {
+            if(loadingText.length >= 19) {
+                console.log(loadingText + " >= 18");
+            }
+            else{
+                setLoadingText((prev) => {
+                const next = prev + ".";
+                console.log(next, next.length);
+                console.log();
+                return next; 
+            });
             }
             }, 2000);
+
+            
+
         const fetchData = async () => {
         try {
             const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=300');
             const data: PokemonApiResponse = await response.json();
-            setPokemonData(data.results);
+            //setPokemonData(data.results);
 
             const details = await Promise.all(data.results.map(async (pokemon) => {
                 const res = await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemon.name);
                 return res.json();
             }));
             
-            clearInterval(loadingInterval);
+           clearInterval(loadingInterval);
 
             setDetailedData(details);
 
@@ -67,8 +92,10 @@ export default function Pokemons() {
     };
 
     fetchData();
+    //clearInterval(loadingInterval);
 
-    }, []);
+
+    },[]);
 
     
     
@@ -81,11 +108,14 @@ export default function Pokemons() {
                 keyExtractor={(item) => item.name}
                 renderItem={({ item }) => (
                     <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#eee' }}>
-                        {item.sprites?.front_default ? (
-                        <Image source={{uri : item.sprites.front_default}} style={{width : 100, height: 100}}/>
-                        ) : ( <Text style={{ fontSize: 18 }}>No Image</Text>)}
-                        <Text style={{ fontSize: 18 }}>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
-                        <Text style={{fontSize: 12, color: "#666"}}>ID: {item.id}</Text>
+                        <TouchableOpacity onPress={() => {setMNodalData([{ name: item.name, image: item.sprites.front_default , id: item.id.toString(), weight: item.weight.toString(), moves: item.moves.map(m => m.move.name), types: item.types.map(t => t.type.name) , url: '' }]);
+                            setModalVisible(true); }}>
+                            {item.sprites?.front_default ? (
+                            <Image source={{uri : item.sprites.front_default}} style={{width : 100, height: 100}}/>
+                            ) : ( <Text style={{ fontSize: 18 }}>No Image</Text>)}
+                            <Text style={{ fontSize: 18 }}>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
+                            <Text style={{fontSize: 12, color: "#666"}}>ID: {item.id}</Text>
+                        </TouchableOpacity>    
                     </View>
                 )}
             /> 
@@ -93,6 +123,33 @@ export default function Pokemons() {
             
             <Text style={{ fontSize: 28, textAlign: 'center', marginTop: 40 }}>{loadingText}</Text>}
             </View>
+            {modalVisible && (
+                <Modal 
+                    animationType="fade"
+                    transparent={true}>
+                        <View style={{ flex: 1, marginTop: 50, backgroundColor: '#ff3333', opacity: 0.95}}>
+                            <View>
+                                <TouchableOpacity style={{right: 20, alignItems: "flex-end"}} onPress={() => setModalVisible(false)}>
+                                    <AntDesign name="close" size={24} color="black" style={{marginTop:20, marginBottom: 10}} />  
+                                </TouchableOpacity>
+                            </View>
+                            <View style={{backgroundColor: "#ffffff", flex: 1}}>
+                                <Image source={{uri: modalData[0].image}} style={{width: 200, height: 200}}/>
+                                <Text style={{fontSize: 22, left: 10, marginBottom: 15}}>{modalData[0].name.charAt(0).toUpperCase() + modalData[0].name.slice(1)}</Text>
+                                <Text style={{fontSize: 18, left: 10, color: "#666"}}>ID: {modalData[0].id}</Text>
+                                <Text style={{fontSize: 18, left: 10, color: "#666"}}>Weight: {modalData[0].weight} kg</Text>
+                                <Text style={{fontSize: 20, left: 10, marginTop: 10}}>Types</Text>
+                                {modalData[0].types.map(t => 
+                                    <Text key={t} style={{fontSize: 18, left: 10, marginTop: 5}}>{t.charAt(0).toUpperCase() + t.slice(1)}</Text>
+                                )}
+                                <Text style={{fontSize: 20, left: 10, marginTop: 10, marginBottom: 10}}>Moves</Text>
+                                {modalData[0].moves.slice(0,4).map((m, index) => 
+                                    <Text key={m} style={{fontSize: 16, left: 10}}>{index + " " + m.charAt(0).toUpperCase() + m.slice(1)}</Text>
+                                )
+                                }
+                            </View>
+                        </View>
+                    </Modal>)}
         </View>
     );
     }
