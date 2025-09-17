@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import {style} from "../style/style";
+import {typeColorsArray} from "../style/typecolor";
 
 
 type image = {
@@ -39,27 +40,6 @@ export default function SearchScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setModalImage] = useState<string | null>(null);
     const [errorMsg, setErrorMsg] = useState<string>("");
-
-    const typeColorsArray = [
-        { type: "normal", color: "#A8A77A" },
-        { type: "fire", color: "#EE8130" },
-        { type: "water", color: "#6390F0" },
-        { type: "electric", color: "#F7D02C" },
-        { type: "grass", "color": "#7AC74C" },
-        { type: "ice", "color": "#96D9D6" },
-        { type: "fighting", "color": "#C22E28" },
-        { type: "poison", "color": "#A33EA1" },
-        { type: "ground", "color": "#E2BF65" },
-        { type: "flying", "color": "#A98FF3" },
-        { type: "psychic", "color": "#F95587" },
-        { type: "bug", "color": "#A6B91A" },
-        { type: "rock", "color": "#B6A136" },
-        { type: "ghost", "color": "#735797" },
-        { type: "dragon", "color": "#6F35FC" },
-        { type: "dark", "color": "#705746" },
-        { type: "steel", "color": "#B7B7CE" },
-        { type: "fairy", "color": "#D685AD" }
-    ];
  
     useEffect(() => {
 
@@ -118,7 +98,7 @@ export default function SearchScreen() {
                         {item.types.map((type, index) => {
                             const typeColor = typeColorsArray.find(t => t.type === type)?.color || '#000';
                             return (
-                                <Text key={index} style={{alignSelf: "flex-start", padding: 4, paddingEnd: 8, borderRadius: 5, margin: 3, fontSize: 16, backgroundColor: typeColor }}> {type.charAt(0).toUpperCase() + type.slice(1)}</Text>
+                                <Text key={index} style={[style.PokémonType, {backgroundColor: typeColor }]}> {type.charAt(0).toUpperCase() + type.slice(1)}</Text>
                             );
                         })}
 

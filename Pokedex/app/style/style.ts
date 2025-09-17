@@ -42,14 +42,18 @@ export const style = StyleSheet.create({
     },
 
     PokémonType:{
-        fontSize: 18, 
+        fontSize: 16, 
         left: 10, 
-        marginTop: 5
+        alignSelf: "flex-start", 
+        padding: 4, 
+        paddingEnd: 8, 
+        borderRadius: 5, 
+        margin: 3, 
     },
 
     PokémonMoves:{
         fontSize: 16, 
-        left: 10
+        left: 10, 
     },
 
     ModalClose:{

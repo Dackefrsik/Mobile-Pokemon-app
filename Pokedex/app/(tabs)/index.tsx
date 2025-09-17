@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Modal } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import {style} from "../style/style";
+import { typeColorsArray } from "../style/typecolor";
 
 export interface Pokemon {
     name: string;
@@ -140,12 +141,18 @@ export default function Pokemons() {
                                 <Text style={style.PokémonAtributes}>ID: {modalData[0].id}</Text>
                                 <Text style={style.PokémonAtributes}>Weight: {modalData[0].weight} kg</Text>
                                 <Text style={style.PokémonTypesMoves}>Types</Text>
-                                {modalData[0].types.map(t => 
-                                    <Text key={t} style={style.PokémonType}>{t.charAt(0).toUpperCase() + t.slice(1)}</Text>
-                                )}
+                                {modalData[0].types.map((type, index) =>  {
+                                    const typecolor = typeColorsArray.find(t => t.type === type )?.color || "#000000";
+                                    return(
+                                    
+                                        <Text key={index} style={[style.PokémonType, {alignSelf: "flex-start", padding: 4, paddingEnd: 8, borderRadius: 5, margin: 3, fontSize: 16, backgroundColor: typecolor}  ]} >{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
+                                    )
+                                })}
                                 <Text style={style.PokémonTypesMoves}>Moves</Text>
                                 {modalData[0].moves.slice(0,4).map((m, index) => 
+                                    
                                     <Text key={m} style={style.PokémonMoves}>{(index + 1) + " " + m.charAt(0).toUpperCase() + m.slice(1)}</Text>
+                                
                                 )
                                 }
                             </View>
